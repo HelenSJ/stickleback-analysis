@@ -1,3 +1,7 @@
+#### Is phenotypic plasticity use-it-or-lose-it? Exploring genetic assimilation of salinity-plastic
+traits across threespine stickleback (Gasterosteus aculeatus) populations ####
+#### Spence-Jones, Webster, Wund, Baker, Foster, Lala
+
 #### To Start ####
 
 library(ggplot2) # plots etc.
