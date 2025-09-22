@@ -1,7 +1,3 @@
-#### Is phenotypic plasticity use-it-or-lose-it? Exploring genetic assimilation of salinity-plastic
-traits across threespine stickleback (Gasterosteus aculeatus) populations ####
-#### Spence-Jones, Webster, Wund, Baker, Foster, Lala
-
 #### To Start ####
 
 library(ggplot2) # plots etc.
@@ -18,7 +14,7 @@ library(geomorph) # morphometric analyses
 library(Evomorph) # Getting deviation from consensus mean morphology
 
 
-setwd()
+setwd("/Users/helen/Desktop/BaldwinGitHub/")
 
 Theme <- theme(axis.line=element_line(colour="black", linewidth=0.5), panel.background=element_blank())
 TypeCols <- scale_colour_manual(values=c("Anadromous"="red","Young Freshwater"="Green", "Old Freshwater"="Blue" ))
@@ -32,7 +28,7 @@ PopFill <- scale_fill_manual(values=c("A_S"="#990033", "A_A"="#FF3333", "YF1_S"=
 
 #### Table 2 ####
 # Hatching against salinity
-Hatching <- read.table("./HatchingSurvival.csv", header=TRUE, sep=",")
+Hatching <- read.table("./Clutch_HatchingSurvival.csv", header=TRUE, sep=",")
 Hatching <- subset(Hatching, Salinity != 40)
 HatchingModel <- lme(PercentSurvivalToHatch ~ poly(Salinity, 2)*PopulationType, random=~1|ClutchID, data=Hatching)
 anova(HatchingModel)
@@ -42,34 +38,32 @@ summary(HatchingModel)
 
 ## Plot 1.1 - survival against salinity, split by population type # colour se by pop
 
-OverallSurvival <- read.table("./11MonthSurvival.csv", header=TRUE, sep=",")
+OverallSurvival <- read.table("./Tank_11MonthSurvival.csv", header=TRUE, sep=",")
 OverallSurvival$PopulationType <- fct_relevel(OverallSurvival$PopulationType, c("Anadromous", "Young Freshwater", "Old Freshwater"))
 
-AvgSurvivalPlot <- ggplot(data=OverallSurvival, mapping=aes(Salinity, StandardisedSurvival)) + geom_line(mapping=aes(Salinity, StandardisedSurvival, col=PopulationType, group=Population), stat="smooth", alpha=0.6, linetype=2) + geom_smooth(mapping=aes(Salinity, StandardisedSurvival, col=PopulationType, fill=PopulationType), se=T, alpha=0.1, size=2) + labs(x="Salinity (ppt)", y="Survival (%)", col= "Population Type", fill="Population Type") + Theme + TypeCols + TypeFill + coord_cartesian(y=c(0,80))
+AvgSurvivalPlot <- ggplot(data=OverallSurvival, mapping=aes(Salinity, StandardisedSurvival)) + geom_line(mapping=aes(Salinity, StandardisedSurvival, col=PopulationType, group=Population), stat="smooth", alpha=0.6, linetype=2) + geom_smooth(mapping=aes(Salinity, StandardisedSurvival, col=PopulationType, fill=PopulationType), se=T, alpha=0.1, linewidth=2) + labs(x="Salinity (ppt)", y="Survival (%)", col= "Population Type", fill="Population Type") + Theme + TypeCols + TypeFill + coord_cartesian(y=c(0,80))
 AvgSurvivalPlot
 
 ## Plot 1.2 - plasticity against population
 
-OverallPlasticity <- read.table("./PopulationPlasticity.csv", header=TRUE, sep=",")
-OverallPlasticity$Population <- factor(OverallPlasticity$Population, levels=c("KB", "RS", "FK", "LB", "CR", "HW", "BB", "CL", "DM"))
-OverallPlasticity$Population <- revalue(OverallPlasticity$Population, c("KB"="A_S", "RS"="A_A", "FK"="YF1_S", "LB"="YF_A", "CR"="YF2_S", "HW"="YF3_S", "BB"="OF1_A", "CL"="OF2_A", "DM"="OF_S"))
-OverallPlasticity$Population <- fct_relevel(OverallPlasticity$Population, c("A_A", "A_S", "YF1_S","YF_A", "YF2_S", "YF3_S", "OF1_A", "OF2_A", "OF_S" ))
-OverallPlasticity$PopulationType <- fct_relevel(OverallPlasticity$PopulationType, c("Anadromous", "Young Freshwater", "Old Freshwater"))
+PopPlasticity <- read.table("./Population_PlasticityIndeces.csv", header=TRUE, sep=",")
+PopPlasticity$Population <- factor(PopPlasticity$Population, levels=c("KB", "RS", "FK", "LB", "CR", "HW", "BB", "CL", "DM"))
+PopPlasticity$Population <- revalue(PopPlasticity$Population, c("KB"="A_S", "RS"="A_A", "FK"="YF1_S", "LB"="YF_A", "CR"="YF2_S", "HW"="YF3_S", "BB"="OF1_A", "CL"="OF2_A", "DM"="OF_S"))
+PopPlasticity$Population <- fct_relevel(PopPlasticity$Population, c("A_A", "A_S", "YF1_S","YF_A", "YF2_S", "YF3_S", "OF1_A", "OF2_A", "OF_S" ))
+PopPlasticity$Type <- fct_relevel(PopPlasticity$Type, c("Anadromous", "Young Freshwater", "Old Freshwater"))
 
-SalinityPlasticityBar <- ggplot(data=OverallPlasticity, mapping=aes(Population, StandardisedPlasticity, fill=PopulationType)) + geom_col(mapping=aes(Population, StandardisedPlasticity)) + labs(x= "Population", y="Cross-Salinity Tolerance (%)") + coord_cartesian(ylim=c(0,100)) + TypeFill+ Theme
-SalinityPlasticityBar
+SalinityToleranceBreadthBar <- ggplot(data=PopPlasticity, mapping=aes(Population, SalinityToleranceBreadth, fill=Type)) + geom_col(mapping=aes(Population, SalinityToleranceBreadth)) + labs(x= "Population", y="Cross-Salinity Tolerance (%)") + coord_cartesian(ylim=c(0,100)) + TypeFill+ Theme
+SalinityToleranceBreadthBar
 
-multiplot(AvgSurvivalPlot, SalinityPlasticityBar, cols=2)
-# size: 7.10 x 13.36 in
 
 #### Physiological Plasticity ####
 
-PlasticityPhysiologyPI <- read.table("./HistologyPlasticityIndeces.csv", header=TRUE, sep=",")
+PopPlasticity <- read.table("./Population_PlasticityIndeces.csv", header=TRUE, sep=",")
 
-PlasticityPhysiologyPI$Population <- factor(PlasticityPhysiologyPI$Population, levels=c("KB", "RS", "FK", "LB", "CR", "HW", "BB", "CL", "DM"))
-PlasticityPhysiologyPI$Population <- revalue(PlasticityPhysiologyPI$Population, c("KB"="A_S", "RS"="A_A", "FK"="YF1_S", "LB"="YF_A", "CR"="YF2_S", "HW"="YF3_S", "BB"="OF1_A", "CL"="OF2_A", "DM"="OF_S"))
+PopPlasticity$Population <- factor(PopPlasticity$Population, levels=c("KB", "RS", "FK", "LB", "CR", "HW", "BB", "CL", "DM"))
+PopPlasticity$Population <- revalue(PopPlasticity$Population, c("KB"="A_S", "RS"="A_A", "FK"="YF1_S", "LB"="YF_A", "CR"="YF2_S", "HW"="YF3_S", "BB"="OF1_A", "CL"="OF2_A", "DM"="OF_S"))
 
-PCARawPI <- prcomp(PlasticityPhysiologyPI[, c(4:10)], center=T, scale=F)
+PCARawPI <- prcomp(PopPlasticity[, c(4:10)], center=T, scale=F)
 PCARawPI # loadings for each term in each component
 summary(PCARawPI) # proportion of variance for each component
 
@@ -78,54 +72,56 @@ summary(PCARawPI) # proportion of variance for each component
 
 ### Figure 2A ###
 
-PlasticityPhysiologyPIRadar <- PlasticityPhysiologyPI %>% select(Population, FilamentWidthPI, InterLamellarWidthPI, LamellarWidthPI, PercentLamellarPI, IonocyteCoveragePI, IonocyteAreaPI, IonocyteRoundnessPI)
+PlasticityPhysiologyPIRadar <- PopPlasticity %>% select(Population, FilamentWidthPI, InterLamellarWidthPI, LamellarWidthPI, PercentLamellarPI, IonocyteCoveragePI, IonocyteAreaPI, IonocyteRoundnessPI)
 
 A_Radar <- subset(PlasticityPhysiologyPIRadar, Population=="A_A"|Population=="A_S") %>% ggradar(group.point.size=0, group.line.width=1, fill=T, fill.alpha=0.25) + PopCols + PopFill + labs(fill="Population", col="Population")
+A_Radar
 YF_Radar <- subset(PlasticityPhysiologyPIRadar, Population=="YF_A"|Population=="YF1_S"|Population=="YF2_S"|Population=="YF3_S") %>% ggradar(group.point.size=0, group.line.width=1, fill=T, fill.alpha=0.25) + PopCols + PopFill + labs(fill="Population", col="Population")
+YF_Radar
 OF_Radar <- subset(PlasticityPhysiologyPIRadar, Population=="OF1_A"|Population=="OF2_A"|Population=="OF_S") %>% ggradar(group.point.size=0, group.line.width=1, fill=T, fill.alpha=0.25) + PopCols + PopFill + labs(fill="Population", col="Population")
+OF_Radar
 
 ### Figure 2B ###
 # PCA Plot
-autoplot(PCARawPI, scale=0, label=FALSE, loadings=TRUE, loadings.label=TRUE, loadings.colour="black", loadings.label.size=3, loadings.label.vjust = -1, loadings.label.colour="black", loadings.label.hjust = -0.01) + Theme + geom_point(aes(colour=PlasticityPhysiologyPI$Type, size=PlasticityPhysiologyPI$PopulationTolerance)) + TypeCols + scale_size(range=c(2,8))  + geom_text(label=PlasticityPhysiologyPI$Population, size=2,hjust=-0.7, vjust=1) + labs(x="PC1 (64.1%)", y="PC2 (21.8%)",col="Population", size="Population Salinity Tolerance (%)")
+autoplot(PCARawPI, scale=0, label=FALSE, loadings=TRUE, loadings.label=TRUE, loadings.colour="black", loadings.label.size=3, loadings.label.vjust = -1, loadings.label.colour="black", loadings.label.hjust = -0.01) + Theme + geom_point(aes(colour=PopPlasticity$Type, size=PopPlasticity$SalinityToleranceBreadth)) + TypeCols + scale_size(range=c(2,8))  + geom_text(label=PopPlasticity$Population, size=2,hjust=-0.7, vjust=1) + labs(x="PC1 (64.1%)", y="PC2 (21.8%)",col="Population", size="Population Salinity Tolerance (%)")
 
 
 #### Trade-offs with growth and survival ####
 
 # density-corrected growth in freshwater with pop salinity tolerance breadth
-FreshwaterLength <- read.table("./FreshwaterLength.csv", header=TRUE, sep=",")
-FreshwaterLength <- subset(AllFreshwaterLengths, AllFreshwaterLengths$AvgFishInTank >4)
+FreshwaterLength <- read.table("./Individ_FreshwaterLength.csv", header=TRUE, sep=",")
 
 DensityCorrectSize <- lm(Length ~ AvgFishInTank, data=FreshwaterLength)
 FreshwaterLength$DensityCorrectedLength <- resid(DensityCorrectSize)
 
 aggregate(FreshwaterLength$DensityCorrectedLength, list(FreshwaterLength$Population), FUN=mean)
 
-FreshwaterMetrics <- read.table("./FreshwaterMetrics.csv", header=TRUE, sep=",")
-cor.test(FreshwaterMetrics$FreshwaterDensityCorrectedLength, FreshwaterMetrics$StandardisedPlasticity, method="spearman")
+PopFreshwaterMetrics <- read.table("./Population_FreshwaterMetrics.csv", header=TRUE, sep=",")
+cor.test(PopFreshwaterMetrics$FreshwaterDensityCorrectedLength, PopFreshwaterMetrics$SalinityToleranceBreadth, method="spearman")
 
 # freshwater survival with pop salinity tolerance breadth
-FreshwaterMetrics <- read.table("./FreshwaterMetrics.csv", header=TRUE, sep=",")
-cor.test(FreshwaterMetrics$FreshwaterSurvival, FreshwaterMetrics$StandardisedPlasticity, method="spearman")
+PopFreshwaterMetrics <- read.table("./Population_FreshwaterMetrics.csv", header=TRUE, sep=",")
+cor.test(PopFreshwaterMetrics$FreshwaterSurvival, PopFreshwaterMetrics$SalinityToleranceBreadth, method="spearman")
 
   # Missing fraction check
-    cor.test(FreshwaterMetrics$FreshwaterDensityCorrectedLength, FreshwaterMetrics$FreshwaterSurvival, method="spearman")
+    cor.test(PopFreshwaterMetrics$FreshwaterDensityCorrectedLength, PopFreshwaterMetrics$FreshwaterSurvival, method="spearman")
 
 # individual within-individual ionocyte area with density-corrected freshwater length
-Pop0CoVarIndiv <- read.table("./Histology_CoeffVars_WithinIndividual.csv", header=T, sep=",")
-cor.test(Pop0CoVarIndiv$DensityCorrectedLength, Pop0CoVarIndiv$CoeffVarIonocyteArea)
+IndivFreshwaterMetrics <- read.table("./Individ_FreshwaterMetrics.csv", header=T, sep=",")
+cor.test(IndivFreshwaterMetrics$DensityCorrectedLength, IndivFreshwaterMetrics$CoeffVarIonocyteArea)
 # population average coeff of variation of within-individual ionocyte area in freshwater, population plasticity index of ionocyte area
-VarIonAreaPlastIndex <- read.table("./Histology_FreshwaterVariationPlasticity.csv", header=T, sep=",")
-cor.test(VarIonAreaPlastIndex$AvgOfCoeffVarIonocyteArea, VarIonAreaPlastIndex$IonocyteAreaPI, method="spearman", alternative="greater")
+PopFreshwaterMetrics <- read.table("./Population_FreshwaterMetrics.csv", header=T, sep=",")
+cor.test(PopFreshwaterMetrics$WithinIndivCoeffVarIonocyteArea, PopFreshwaterMetrics$IonocyteAreaPI, method="spearman", alternative="greater")
 
 #### Processing Morphological Landmark Data ####
 
 #read in all coordinates, turn 1st column (photoID) into row labels, exclude first 5 columns (classifiers) 
 # Remember to invert X coordinates for R side fish first!
-# Missing R-side fish: CR2c_7, DM0b_13, DM2c_1, KB3b_4, LB1a_5, RS0b_7; use "./LRLandmarks.csv" for all, or "./LRLandmarksSubset.csv" to exclude them
-AllLandmarkCoords <- (as.matrix(read.table("./LRLandmarksSubset.csv", header=TRUE, row.names=1, sep=",")[,-(1:6)]))
+# Missing R-side fish: CR2c_7, DM0b_13, DM2c_1, KB3b_4, LB1a_5, RS0b_7 are not included
+AllLandmarkCoords <- (as.matrix(read.table("./Individ_LRLandmarks.csv", header=TRUE, row.names=1, sep=",")[,-(1:6)]))
 
 # read in first 5 columns as the classifiers, with row labels as 1st column, convert all to factors:
-Classifiers <- (read.table("./LRLandmarksSubset.csv", header=TRUE, row.names=1, sep=",")[,1:6])
+Classifiers <- (read.table("./Individ_LRLandmarks.csv", header=TRUE, row.names=1, sep=",")[,1:6])
 Classifiers[sapply(Classifiers, is.character)] <- lapply(Classifiers[sapply(Classifiers, is.character)], as.factor)
 summary(Classifiers)
 
@@ -154,8 +150,7 @@ BaldwinProcCoordsInd <- BaldwinProcCoords$symm.shape
 BaldwinLRAsymm <- BaldwinProcCoords$unsigned.AI
 
 # Create a geomorph dataframe with symmetric shape Procrustes coordinates
-# All data: "./LandmarkSamples.csv". Only samples with both sides: "./LandmarkSamplesSubset.csv"
-MorphSamples <- read.table("./LandmarkSamplesSubset.csv",header=TRUE, sep=",")
+MorphSamples <- read.table("./Individ_LandmarkSamples.csv",header=TRUE, sep=",")
 MorphSamples[sapply(MorphSamples, is.character)] <- lapply(MorphSamples[sapply(MorphSamples, is.character)], as.factor)
 
 BaldwinProcDataframeIndiv <- geomorph.data.frame(shape=BaldwinProcCoords$symm.shape, ind=MorphSamples$FishID, tank=MorphSamples$TankID, population=MorphSamples$Population, salinity=MorphSamples$Salinity, length=MorphSamples$Length)
@@ -175,58 +170,58 @@ ggplot(PCAData, aes(PC1, PC2, col=Population, shape=Salinity)) + geom_point()
 
 
 #### Table 3 ####
-# Correlations between tolerance breadth and variation in physiological and morphological metrics
+# Correlations between tolerance breadth and variation in physiological and morphological metrics in freshwater
 
 ### Inter-Individual Physiological Variation ###
-PopSalBetweenCoVar <- read.table("./Histology_PopCoeffVars_BetweenIndividual.csv", header=T, sep=",")
+PopFreshwaterMetrics <- read.table("./Population_FreshwaterMetrics.csv", header=T, sep=",")
 
-cor.test(PopSalBetweenCoVar$PopulationPlasticity, PopSalBetweenCoVar$CoefVarFilamentWidth, method="spearman")
-cor.test(PopSalBetweenCoVar$PopulationPlasticity, PopSalBetweenCoVar$CoefVarLamellarWidth, method="spearman")
-cor.test(PopSalBetweenCoVar$PopulationPlasticity, PopSalBetweenCoVar$CoefVarInterLamellarWidth, method="spearman")
-cor.test(PopSalBetweenCoVar$PopulationPlasticity, PopSalBetweenCoVar$CoefVarIonocyteAre, method="spearman")
-cor.test(PopSalBetweenCoVar$PopulationPlasticity, PopSalBetweenCoVar$CoefVarIonocyteRoundness, method="spearman")
-cor.test(PopSalBetweenCoVar$PopulationPlasticity, PopSalBetweenCoVar$CoefVarIonocyteCoverage, method="spearman")
-cor.test(PopSalBetweenCoVar$PopulationPlasticity, PopSalBetweenCoVar$CoefVarIonocyteDistribution, method="spearman")
+cor.test(PopFreshwaterMetrics$SalinityToleranceBreadth, PopFreshwaterMetrics$BetweenIndivCoefVarFilamentWidth, method="spearman")
+cor.test(PopFreshwaterMetrics$SalinityToleranceBreadth, PopFreshwaterMetrics$BetweenIndivCoefVarLamellarWidth, method="spearman")
+cor.test(PopFreshwaterMetrics$SalinityToleranceBreadth, PopFreshwaterMetrics$BetweenIndivCoefVarInterLamellarWidth, method="spearman")
+cor.test(PopFreshwaterMetrics$SalinityToleranceBreadth, PopFreshwaterMetrics$BetweenIndivCoefVarIonocyteAre, method="spearman")
+cor.test(PopFreshwaterMetrics$SalinityToleranceBreadth, PopFreshwaterMetrics$BetweenIndivCoefVarIonocyteRoundness, method="spearman")
+cor.test(PopFreshwaterMetrics$SalinityToleranceBreadth, PopFreshwaterMetrics$BetweenIndivCoefVarIonocyteCoverage, method="spearman")
+cor.test(PopFreshwaterMetrics$SalinityToleranceBreadth, PopFreshwaterMetrics$BetweenIndivCoefVarIonocyteDistribution, method="spearman")
 
 ### Inter-Individual Morphological Variation ###
-MorphFreshVar <- read.table("./Morphology_FreshwaterVariation.csv", header=T, sep=",")
-cor.test(MorphFreshVar$AvgOfPopulationPlasticity, MorphFreshVar$MorphologicalDisparity, method="spearman")
+PopFreshwaterMetrics <- read.table("./Population_FreshwaterMetrics.csv", header=T, sep=",")
+cor.test(PopFreshwaterMetrics$SalinityToleranceBreadth, PopFreshwaterMetrics$MorphologicalDisparity, method="spearman")
 
 ### Within-Individual Physiological Variation ###
 
-Pop0CoVar <- read.table("./Histology_FreshwaterAvgWithinIndivCoeffVars.csv", header=T, sep=",")
-cor.test(Pop0CoVar$PopulationPlasticity, Pop0CoVar$AvgOfCoeffVarLamellarWidth, method="spearman", alternative="greater")
-cor.test(Pop0CoVar$PopulationPlasticity, Pop0CoVar$AvgOfCoeffVarInterLamellarWidth, method="spearman", alternative="greater")
-cor.test(Pop0CoVar$PopulationPlasticity, Pop0CoVar$AvgOfCoeffVarIonocyteArea, method="spearman", alternative="greater")
-cor.test(Pop0CoVar$PopulationPlasticity, Pop0CoVar$AvgOfCoeffVarIonocyteRoundness, method="spearman", alternative="greater")
+PopFreshwaterMetrics <- read.table("./Population_FreshwaterMetrics.csv", header=T, sep=",")
+cor.test(PopFreshwaterMetrics$SalinityToleranceBreadth, PopFreshwaterMetrics$WithinIndivCoeffVarLamellarWidth, method="spearman", alternative="greater")
+cor.test(PopFreshwaterMetrics$SalinityToleranceBreadth, PopFreshwaterMetrics$WithinIndivCoeffVarInterLamellarWidth, method="spearman", alternative="greater")
+cor.test(PopFreshwaterMetrics$SalinityToleranceBreadth, PopFreshwaterMetrics$WithinIndivCoeffVarIonocyteArea, method="spearman", alternative="greater")
+cor.test(PopFreshwaterMetrics$SalinityToleranceBreadth, PopFreshwaterMetrics$WithinIndivCoeffVarIonocyteRoundness, method="spearman", alternative="greater")
 
 ### Left-Right Morphological Asymmetry ###
-MorphFreshVar <- read.table("./Morphology_FreshwaterVariation.csv", header=T, sep=",")
-cor.test(MorphFreshVar$AvgOfPopulationPlasticity, MorphFreshVar$AvgOfAsymmetry, method="spearman")
+PopFreshwaterMetrics <- read.table("./Population_FreshwaterMetrics.csv", header=T, sep=",")
+cor.test(PopFreshwaterMetrics$SalinityToleranceBreadth, PopFreshwaterMetrics$AvgOfAsymmetry, method="spearman")
 
 
 #### Figure 3 ####
 
 ### Figure 3a ###
-FreshwaterMetrics <- read.table("./FreshwaterMetrics.csv", header=TRUE, sep=",")
-FreshwaterMetrics$Population <- revalue(FreshwaterMetrics$Population, c("KB"="A_S", "RS"="A_A", "FK"="YF1_S", "LB"="YF_A", "CR"="YF2_S", "HW"="YF3_S", "BB"="OF1_A", "CL"="OF2_A", "DM"="OF_S"))
-FreshwaterMetrics$Population <- fct_relevel(FreshwaterMetrics$Population, c("A_A", "A_S", "YF_A", "YF1_S", "YF2_S", "YF3_S", "OF1_A", "OF2_A", "OF_S" ))
+PopFreshwaterMetrics <- read.table("./Population_FreshwaterMetrics.csv", header=TRUE, sep=",")
+PopFreshwaterMetrics$Population <- revalue(PopFreshwaterMetrics$Population, c("KB"="A_S", "RS"="A_A", "FK"="YF1_S", "LB"="YF_A", "CR"="YF2_S", "HW"="YF3_S", "BB"="OF1_A", "CL"="OF2_A", "DM"="OF_S"))
+PopFreshwaterMetrics$Population <- fct_relevel(PopFreshwaterMetrics$Population, c("A_A", "A_S", "YF_A", "YF1_S", "YF2_S", "YF3_S", "OF1_A", "OF2_A", "OF_S" ))
 
-LengthPlot <- ggplot(FreshwaterMetrics, aes(StandardisedPlasticity, FreshwaterDensityCorrectedLength))  + geom_smooth(method=lm, linetype=2, col="black") + geom_errorbar(aes(ymin=FreshwaterDensityCorrectedLength - StErrLength, ymax=FreshwaterDensityCorrectedLength + StErrLength)) + geom_point(aes(col=Population), size=5) + Theme + PopCols + labs(x="Population Salinity Tolerance Breadth (%)", y="Density-Corrected Length in Freshwater (mm)") + coord_cartesian(xlim=c(15,100))
+LengthPlot <- ggplot(PopFreshwaterMetrics, aes(SalinityToleranceBreadth, FreshwaterDensityCorrectedLength))  + geom_smooth(method=lm, linetype=2, col="black") + geom_errorbar(aes(ymin=FreshwaterDensityCorrectedLength - StErrCorrectedLength, ymax=FreshwaterDensityCorrectedLength + StErrCorrectedLength)) + geom_point(aes(col=Population), size=5) + Theme + PopCols + labs(x="Population Salinity Tolerance Breadth (%)", y="Density-Corrected Length in Freshwater (mm)") + coord_cartesian(xlim=c(15,100))
 LengthPlot
 
 ### Figure 3b ###
-Pop0CoVar <- read.table("./Histology_FreshwaterAvgWithinIndivCoeffVars.csv", header=T, sep=",")
+PopFreshwaterMetrics <- read.table("./Population_FreshwaterMetrics.csv", header=T, sep=",")
 
-Pop0CoVar$Population <- revalue(Pop0CoVar$Population, c("KB"="A_S", "RS"="A_A", "FK"="YF1_S", "LB"="YF_A", "CR"="YF2_S", "HW"="YF3_S", "BB"="OF1_A", "CL"="OF2_A", "DM"="OF_S"))
-Pop0CoVar$Population <- fct_relevel(Pop0CoVar$Population, c("A_A", "A_S", "YF_A", "YF1_S", "YF2_S", "YF3_S", "OF1_A", "OF2_A", "OF_S" ))
+PopFreshwaterMetrics$Population <- revalue(PopFreshwaterMetrics$Population, c("KB"="A_S", "RS"="A_A", "FK"="YF1_S", "LB"="YF_A", "CR"="YF2_S", "HW"="YF3_S", "BB"="OF1_A", "CL"="OF2_A", "DM"="OF_S"))
+PopFreshwaterMetrics$Population <- fct_relevel(PopFreshwaterMetrics$Population, c("A_A", "A_S", "YF_A", "YF1_S", "YF2_S", "YF3_S", "OF1_A", "OF2_A", "OF_S" ))
 
-AreaVarPlot <- ggplot(Pop0CoVar, aes(PopulationPlasticity, AvgOfCoeffVarIonocyteArea)) + geom_smooth(method=lm, linetype=2, col="black") + geom_errorbar(aes(ymin=AvgOfCoeffVarIonocyteArea - StErrCoeffVarIonocyteArea, ymax=AvgOfCoeffVarIonocyteArea + StErrCoeffVarIonocyteArea)) + geom_point(aes(col=Population), size=5) + Theme + PopCols + labs(x="Population Salinity Tolerance Breadth (%)", y="Coefficient of Variance of Ionocyte Area in Freshwater")
-
+AreaVarPlot <- ggplot(PopFreshwaterMetrics, aes(SalinityToleranceBreadth, WithinIndivCoeffVarIonocyteArea)) + geom_smooth(method=lm, linetype=2, col="black") + geom_errorbar(aes(ymin=WithinIndivCoeffVarIonocyteArea - StErrWithinIndivCoeffVarIonocyteArea, ymax=WithinIndivCoeffVarIonocyteArea + StErrWithinIndivCoeffVarIonocyteArea)) + geom_point(aes(col=Population), size=5) + Theme + PopCols + labs(x="Population Salinity Tolerance Breadth (%)", y="Coefficient of Variance of Ionocyte Area in Freshwater")
+AreaVarPlot
 
 ### Figure 3c ###
 
-ProcrustesVariances <- read.table("./ProcrustesVariancesByPop.csv", header=T, sep=",")
+ProcrustesVariances <- read.table("./PopSal_ProcrustesVariances.csv", header=T, sep=",")
 ProcrustesVariances$Population <- factor(ProcrustesVariances$Population, levels=c("KB", "RS", "FK", "LB", "CR", "HW", "BB", "CL", "DM"))
 ProcrustesVariances$Population <- revalue(ProcrustesVariances$Population, c("KB"="A_S", "RS"="A_A", "FK"="YF1_S", "LB"="YF_A", "CR"="YF2_S", "HW"="YF3_S", "BB"="OF1_A", "CL"="OF2_A", "DM"="OF_S"))
 ProcrustesVariances$Population <- fct_relevel(ProcrustesVariances$Population, c("A_A", "A_S", "YF1_S", "YF_A", "YF2_S", "YF3_S", "OF1_A", "OF2_A", "OF_S" ))
@@ -234,15 +229,13 @@ ProcrustesVariances$Population <- fct_relevel(ProcrustesVariances$Population, c(
 MorphVarPlot <- ggplot(ProcrustesVariances, aes(Salinity, MorphologicalDisparity, col=Population)) + geom_line(size=1) + labs(x="Salinity (ppt)", y="Inter-individual Morphological Variation (Procrustes Variance)", col="Population") + PopCols + Theme + geom_vline(aes(xintercept=30), linetype=2, alpha=0.4)
 MorphVarPlot
 
-multiplot(LengthPlot, MorphVarPlot, AreaVarPlot, cols=2)
-
 #### Trade-offs with salinity tolerance breadth and change in morphological variation with salinity ####
-MorphPI <- read.table("./MorphologicalPlasticityIndex.csv", header=T, sep=",")
+PopPlasticity <- read.table("./Population_PlasticityIndeces.csv", header=T, sep=",")
 
 # overall pop salinity tol breadth and plasticity index of inter-individ variation
-cor.test(MorphPI$ToleranceBreadth, MorphPI$PIInterIndivVar30, method="spearman")
+cor.test(PopPlasticity$SalinityToleranceBreadth, PopPlasticity$MorphInterIndivVarPI, method="spearman")
 # overall pop salinity tol breadth and plasticity index of within-individ variation
-cor.test(MorphPI$ToleranceBreadth, MorphPI$PIWithinIndividVar, method="spearman")
+cor.test(PopPlasticity$SalinityToleranceBreadth, PopPlasticity$MorphWithinIndivVarPI, method="spearman")
 
 
 #### Table 4 ####
@@ -260,7 +253,7 @@ MorphDisparity$PV.dist
 ## Calculating within-individual variation (fluctuating asymmetry)
 
 BaldwinLRAsymm <- BaldwinProcCoords$unsigned.AI
-MorphSamples <- read.table("./LandmarkSamplesSubset.csv",header=TRUE, sep=",")
+MorphSamples <- read.table("./Individ_LandmarkSamples.csv",header=TRUE, sep=",")
 MorphSamples[sapply(MorphSamples, is.character)] <- lapply(MorphSamples[sapply(MorphSamples, is.character)], as.factor)
 
 BaldwinProcDataframeAsymm <- data.frame(fluctasymm=BaldwinProcCoords$unsigned.AI, ind=MorphSamples$FishID, tank=MorphSamples$TankID, population=MorphSamples$Population, salinity=MorphSamples$Salinity, length=MorphSamples$Length)
@@ -268,7 +261,7 @@ BaldwinProcDataframeAsymm$salinity <- as.factor(BaldwinProcDataframeAsymm$salini
 
 ## Calculating Procrustes Distances between each individual and their population/salinity group mean
 
-# We use the earlier-calculated 'BaldwinProcDataframeIndiv' which has all symmetric shape component landmarks for all individuals
+# This uses the earlier-calculated 'BaldwinProcDataframeIndiv' which has all symmetric shape component landmarks for all individuals
 # And mshape(BaldwinProcDataframeIndiv$shape) to get the mean (consensus configuration) for each salinity/population
 
 # Subset whole dataset by salinity/population groups
@@ -343,7 +336,7 @@ BaldwinProcDataframeAsymm <- data.frame(fluctasymm=BaldwinProcCoords$unsigned.AI
 BaldwinProcDataframeAsymm$salinity <- as.factor(BaldwinProcDataframeAsymm$salinity)
 # Combine individual L-R symmetry with individual procrustes distance from mean morphology
 BaldwinIndivVariationMetrics <- full_join(ProcrustesDistancesAll, BaldwinProcDataframeAsymm, by="Individual")
-write.csv(BaldwinIndivVariationMetrics, file="Morphology_IndividualMetrics.csv")
+  # write.csv(BaldwinIndivVariationMetrics, file="Individ_MorphologyMetrics.csv")
 
 # And *finally* run the correlation test!
 cor.test(BaldwinIndivVariationMetrics$ProcDist, BaldwinIndivVariationMetrics$fluctasymm)
@@ -373,12 +366,12 @@ cor.test(DMSub$ProcDist,DMSub$fluctasymm)
 
 #### Extended Data Table 4 ####
 # PCA loadings of variation in plasticity indeces of physiological metrics between populations (from Fig 2)
-PlasticityPhysiologyPI <- read.table("./HistologyPlasticityIndeces.csv", header=TRUE, sep=",")
+PopPlasticity <- read.table("./Population_PlasticityIndeces.csv", header=TRUE, sep=",")
 
-PlasticityPhysiologyPI$Population <- factor(PlasticityPhysiologyPI$Population, levels=c("KB", "RS", "FK", "LB", "CR", "HW", "BB", "CL", "DM"))
-PlasticityPhysiologyPI$Population <- revalue(PlasticityPhysiologyPI$Population, c("KB"="A_S", "RS"="A_A", "FK"="YF1_S", "LB"="YF_A", "CR"="YF2_S", "HW"="YF3_S", "BB"="OF1_A", "CL"="OF2_A", "DM"="OF_S"))
+PopPlasticity$Population <- factor(PopPlasticity$Population, levels=c("KB", "RS", "FK", "LB", "CR", "HW", "BB", "CL", "DM"))
+PopPlasticity$Population <- revalue(PopPlasticity$Population, c("KB"="A_S", "RS"="A_A", "FK"="YF1_S", "LB"="YF_A", "CR"="YF2_S", "HW"="YF3_S", "BB"="OF1_A", "CL"="OF2_A", "DM"="OF_S"))
 
-PCARawPI <- prcomp(PlasticityPhysiologyPI[, c(4:10)], center=T, scale=F)
+PCARawPI <- prcomp(PopPlasticity[, c(4:10)], center=T, scale=F)
 PCARawPI # loadings for each term in each component
 summary(PCARawPI) # proportion of variance for each component
 
@@ -388,7 +381,7 @@ summary(PCARawPI) # proportion of variance for each component
 
 ### Figure A1 ###
 
-ClutchCoV <- read.table("./ClutchSurvivalCoefVar.csv", header=TRUE, sep=",")
+ClutchCoV <- read.table("./Clutch_DailySurvivalCoefVar.csv", header=TRUE, sep=",")
 ClutchCoV$Population <- revalue(ClutchCoV$Population, c("KB"="A_S", "RS"="A_A", "FK"="YF1_S", "LB"="YF_A", "CR"="YF2_S", "HW"="YF3_S", "BB"="OF1_A", "CL"="OF2_A", "DM"="OF_S"))
 ClutchCoV$Population <- fct_relevel(ClutchCoV$Population, c("A_A", "A_S", "YF_A", "YF1_S", "YF2_S", "YF3_S", "OF1_A", "OF2_A", "OF_S" ))
 
@@ -396,8 +389,9 @@ ggplot(ClutchCoV, aes(Day,CoV, col=Population, fill=Population))+ geom_smooth(al
 
 ### Figure A2 ###
 
-TankCoV <- read.table("./TankSurvivalCoefVar.csv", header=TRUE, sep=",")
+TankCoV <- read.table("./Tank_MonthlySurvivalCoefVar.csv", header=TRUE, sep=",")
 TankCoV$Population <- revalue(TankCoV$Population, c("KB"="A_S", "RS"="A_A", "FK"="YF1_S", "LB"="YF_A", "CR"="YF2_S", "HW"="YF3_S", "BB"="OF1_A", "CL"="OF2_A", "DM"="OF_S"))
 TankCoV$Population <- fct_relevel(TankCoV$Population, c("A_A", "A_S", "YF_A", "YF1_S", "YF2_S", "YF3_S", "OF1_A", "OF2_A", "OF_S" ))
 
 ggplot(TankCoV, aes(MeasureMonth,CoV, col=Population, fill=Population))+ geom_smooth(alpha=0.2) + labs(x="Month", y="Between-treatment Coefficient of Variation in Survival") + Theme + coord_cartesian(xlim=c(0,11), ylim=c(0,0.6)) + PopCols + PopFill
+
